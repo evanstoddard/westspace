@@ -1,0 +1,17 @@
+[project]
+name = "westspace"
+version = "0.1.0"
+description = "A utility managing Zephyr project workspaces."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "platformdirs>=4.11.5",
+    "pyyaml>=6.0.3",
+]
+
+[project.scripts]
+westspace = "westspace:main"
+
+[build-system]
+requires = ["uv_build>=0.12.8,<0.13.0"]
+build-backend = "uv_build"
