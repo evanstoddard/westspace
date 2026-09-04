@@ -92,6 +92,75 @@ def default_config(target: dict[str, Any]) -> str | None:
     return None
 
 
+@dataclass
+class ResolvedTarget:
+    """A concrete ``target:config`` pair with its build settings merged in."""
+
+    name: str
+    config_name: str
+    board: str
+    source: str
+    sysbuild: bool
+    build_dir: str
+    overlays: list[str]
+    conf: list[str]
+    snippets: list[str]
+    cmake_args: list[str]
+    west_args: list[str]
+
+    @property
+    def label(self) -> str:
+        return f"{self.name}:{self.config_name}"
+
+
+def resolve_target(cfg: "Config", spec: str | None) -> ResolvedTarget:
+    """Resolve a ``TARGET[:CONFIG]`` string (or ``None``) against *cfg*."""
+    targets = cfg.targets
+    if not targets:
+        raise ConfigError(f"{cfg.path}: no targets defined")
+
+    target_name, _, config_name = (spec or "").partition(":")
+    target_name = target_name or cfg.resolve_default_target()
+    if not target_name:
+        raise ConfigError(
+            f"{cfg.path}: no default_target set; name a target explicitly "
+            f"(one of: {', '.join(targets)})"
+        )
+    if target_name not in targets:
+        raise ConfigError(
+            f"{cfg.path}: unknown target '{target_name}' (known: {', '.join(targets)})"
+        )
+    target = targets[target_name]
+    configs = target.get("configs") or {}
+
+    config_name = config_name or default_config(target)
+    if not config_name:
+        raise ConfigError(
+            f"{cfg.path}: target '{target_name}' has no default_config; "
+            f"use TARGET:CONFIG (one of: {', '.join(configs)})"
+        )
+    if config_name not in configs:
+        raise ConfigError(
+            f"{cfg.path}: target '{target_name}' has no config '{config_name}' "
+            f"(known: {', '.join(configs)})"
+        )
+    conf_data = configs[config_name] or {}
+
+    return ResolvedTarget(
+        name=target_name,
+        config_name=config_name,
+        board=target["board"],
+        source=target["source"],
+        sysbuild=bool(target.get("sysbuild", False)),
+        build_dir=conf_data.get("build_dir") or f"build/{target_name}-{config_name}",
+        overlays=list(conf_data.get("overlays") or []),
+        conf=list(conf_data.get("conf") or []),
+        snippets=list(conf_data.get("snippets") or []),
+        cmake_args=list(conf_data.get("cmake_args") or []),
+        west_args=list(conf_data.get("west_args") or []),
+    )
+
+
 def load(path: Path) -> Config:
     """Parse and validate the config file at *path*."""
     try:

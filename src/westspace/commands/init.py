@@ -38,7 +38,14 @@ def configure(parser: argparse.ArgumentParser) -> None:
 def run(args: argparse.Namespace) -> int:
     ws = workspace.from_args(args)
     cfg = config.load(ws.config_path)
+    initialize(ws, cfg, force=args.force)
+    return 0
 
+
+def initialize(
+    ws: workspace.Workspace, cfg: config.Config, *, force: bool = False
+) -> None:
+    """Run the full init sequence for *ws*. Also used by ``build`` for auto-init."""
     _check_manifest(ws, cfg)
 
     if cfg.is_ncs:
@@ -46,7 +53,7 @@ def run(args: argparse.Namespace) -> int:
     else:
         runner = _provision_vanilla(ws, cfg)
 
-    _west_init(runner, ws, cfg, force=args.force)
+    _west_init(runner, ws, cfg, force=force)
     runner.update()
     if not cfg.is_ncs:
         # NCS's toolchain bundle already ships every Zephyr/NCS Python
@@ -58,7 +65,6 @@ def run(args: argparse.Namespace) -> int:
 
     hosttools.check()
     log.info("workspace ready: %s", ws.root)
-    return 0
 
 
 def _check_manifest(ws: workspace.Workspace, cfg: config.Config) -> None:

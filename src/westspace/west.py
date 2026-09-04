@@ -10,6 +10,7 @@ nrfutil toolchain actually exists is the caller's job (see ``commands/init``).
 """
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -53,6 +54,43 @@ class WestRunner:
             self.run("sdk", "install", "-t", *toolchains)
         else:
             self.run("sdk", "install", "-T")
+
+    def build(
+        self,
+        source: str,
+        *,
+        board: str,
+        build_dir: str,
+        sysbuild: bool = False,
+        pristine: str | None = None,
+        snippets: Sequence[str] = (),
+        overlays: Sequence[str] = (),
+        conf: Sequence[str] = (),
+        cmake_args: Sequence[str] = (),
+        west_args: Sequence[str] = (),
+        extra: Sequence[str] = (),
+    ) -> None:
+        argv = ["build", "-b", board, "-d", build_dir]
+        if sysbuild:
+            argv.append("--sysbuild")
+        if pristine:
+            argv += ["-p", pristine]
+        for snippet in snippets:
+            argv += ["-S", snippet]
+        argv += list(west_args)
+        argv.append(source)
+
+        cmake: list[str] = []
+        if overlays:
+            cmake.append("-DEXTRA_DTC_OVERLAY_FILE=" + ";".join(overlays))
+        if conf:
+            cmake.append("-DEXTRA_CONF_FILE=" + ";".join(conf))
+        cmake += list(cmake_args)
+        cmake += list(extra)
+        if cmake:
+            argv += ["--", *cmake]
+
+        self.run(*argv)
 
 
 def runner_for(cfg: Config, ws: Workspace, *, nrfutil_path: str | None = None) -> WestRunner:
