@@ -64,6 +64,26 @@ class Config:
     def default_target(self) -> str | None:
         return self.data.get("default_target")
 
+    def resolve_default_target(self) -> str | None:
+        """Target used when none is named: the explicit ``default_target``, or the
+        sole target when exactly one is defined."""
+        if self.default_target:
+            return self.default_target
+        if len(self.targets) == 1:
+            return next(iter(self.targets))
+        return None
+
+
+def default_config(target: dict[str, Any]) -> str | None:
+    """Config used when a target is named without ``:config``: the target's
+    ``default_config``, otherwise a config literally keyed ``default``."""
+    explicit = target.get("default_config")
+    if explicit:
+        return explicit
+    if "default" in (target.get("configs") or {}):
+        return "default"
+    return None
+
 
 def load(path: Path) -> Config:
     """Parse and validate the config file at *path*."""
