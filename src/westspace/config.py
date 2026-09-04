@@ -1,10 +1,8 @@
 """Load and validate ``westspace.yml``.
 
 The parsed document is kept as a plain ``dict`` on :class:`Config`; typed
-accessors cover the handful of fields the commands need today. Validation uses
-the bundled ``westspace.schema.json`` via :mod:`jsonschema` when it is installed,
-and falls back to a couple of structural checks otherwise (jsonschema is not yet
-a hard dependency).
+accessors cover the handful of fields the commands need today. Validation is
+done against the bundled ``westspace.schema.json`` with :mod:`jsonschema`.
 """
 
 import json
@@ -13,6 +11,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
+import jsonschema
 import yaml
 
 from .errors import ConfigError
@@ -105,13 +104,6 @@ def load(path: Path) -> Config:
 
 def validate(data: dict[str, Any], *, source: Path) -> None:
     """Validate *data* against the schema, raising :class:`ConfigError` on failure."""
-    try:
-        import jsonschema
-    except ModuleNotFoundError:
-        if not data.get("targets"):
-            raise ConfigError(f"{source}: no targets defined") from None
-        return
-
     try:
         jsonschema.validate(data, load_schema())
     except jsonschema.ValidationError as exc:
