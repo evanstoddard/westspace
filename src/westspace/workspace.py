@@ -4,6 +4,7 @@ A *workspace* is the directory tree rooted at the one containing ``westspace.yml
 (the same directory that will hold ``.west/`` after ``westspace init``).
 """
 
+import configparser
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -38,6 +39,24 @@ class Workspace:
     @property
     def is_initialized(self) -> bool:
         return self.west_dir.is_dir()
+
+    def initialized_manifest(self) -> tuple[str, str] | None:
+        """``(path, file)`` recorded in ``.west/config`` by ``west init``.
+
+        Returns ``None`` when the file is missing or unreadable.
+        """
+        config_file = self.west_dir / "config"
+        if not config_file.is_file():
+            return None
+        parser = configparser.ConfigParser()
+        try:
+            parser.read(config_file)
+            return (
+                parser.get("manifest", "path", fallback=""),
+                parser.get("manifest", "file", fallback="west.yml"),
+            )
+        except configparser.Error:
+            return None
 
 
 def find(start: Path | None = None, *, search_parents: bool = True) -> Workspace:
