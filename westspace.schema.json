@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/evanrstoddard/westspace/westspace.schema.json",
+  "title": "westspace configuration",
+  "description": "Declarative description of a Zephyr west workspace: flavor (vanilla or NCS), build targets, and per-target configurations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["targets"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional schema reference for editors."
+    },
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version. Currently always 1."
+    },
+    "ncs": {
+      "type": "object",
+      "description": "Absent => vanilla Zephyr (upstream zephyrproject-rtos). Present => nRF Connect SDK (sdk-nrf).",
+      "additionalProperties": false,
+      "required": ["version"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Set false to keep NCS settings on file but build vanilla."
+        },
+        "version": {
+          "type": "string",
+          "description": "sdk-nrf revision: release tag (e.g. v2.7.0), branch, or commit SHA."
+        },
+        "manifest_file": {
+          "type": "string",
+          "default": "west-ncs.yml",
+          "description": "West manifest inside manifest_dir used for `west init -l --mf` when NCS is enabled. The template ships this alongside the vanilla manifest_file."
+        }
+      }
+    },
+    "manifest_dir": {
+      "type": "string",
+      "default": "project",
+      "description": "Directory containing the west manifest, passed to `west init -l`."
+    },
+    "manifest_file": {
+      "type": "string",
+      "default": "west.yml",
+      "description": "West manifest inside manifest_dir used for `west init -l --mf`. Overridden by ncs.manifest_file when NCS is enabled."
+    },
+    "default_target": {
+      "type": "string",
+      "description": "Target used when `westspace build` is invoked with no target. If omitted and only one target exists, that target is used."
+    },
+    "targets": {
+      "type": "object",
+      "description": "Named build targets. Keys are target names used on the CLI as `target` or `target:config`.",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/target" }
+    }
+  },
+  "$defs": {
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "board", "configs"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Application source directory passed to `west build` (relative to workspace root)."
+        },
+        "board": {
+          "type": "string",
+          "description": "Zephyr board target, e.g. nrf52840dk/nrf52840 or native_sim/native/64."
+        },
+        "sysbuild": {
+          "type": "boolean",
+          "description": "Build with sysbuild (`--sysbuild`). Defaults to west's own default when unset."
+        },
+        "default_config": {
+          "type": "string",
+          "description": "Config used when the target is named without `:config`. If omitted, a config keyed `default` is required."
+        },
+        "configs": {
+          "type": "object",
+          "description": "Named configurations for this target. Keys are config names used on the CLI as `target:config`.",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/config" }
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A build variant of its parent target: extra DTS overlays, Kconfig fragments, snippets, and build args.",
+      "properties": {
+        "overlays": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Devicetree overlay files (relative to the target source dir)."
+        },
+        "conf": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Kconfig fragment files, applied via EXTRA_CONF_FILE (relative to the target source dir)."
+        },
+        "snippets": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Zephyr snippets to enable (`-S`)."
+        },
+        "cmake_args": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Extra args passed through to CMake after `--`."
+        },
+        "west_args": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Extra args passed to `west build` itself."
+        },
+        "build_dir": {
+          "type": "string",
+          "description": "Build output directory. If unset, westspace derives one (e.g. build/<target>-<config>)."
+        }
+      }
+    }
+  }
+}
