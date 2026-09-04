@@ -21,7 +21,7 @@ log = logging.getLogger("westspace")
 NAME = "create"
 HELP = "Scaffold a new workspace from the Zephyr project template"
 
-DEFAULT_TEMPLATE_REPO = "https://github.com/evanrstoddard/zephyr_template"
+DEFAULT_TEMPLATE_REPO = "https://github.com/evanstoddard/zephyr_template"
 
 _GITHUB_RE = re.compile(r"github\.com[/:]([^/]+)/(.+?)(?:\.git)?/?$")
 

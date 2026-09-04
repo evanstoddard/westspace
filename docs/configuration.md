@@ -69,7 +69,7 @@ Resolution when a command takes `TARGET[:CONFIG]`:
 
 ## Vanilla example
 
-    # yaml-language-server: $schema=https://github.com/evanrstoddard/westspace/westspace.schema.json
+    # yaml-language-server: $schema=https://github.com/evanstoddard/westspace/westspace.schema.json
     version: 1
 
     manifest_dir: project
@@ -99,7 +99,7 @@ Resolution when a command takes `TARGET[:CONFIG]`:
 
 ## NCS example
 
-    # yaml-language-server: $schema=https://github.com/evanrstoddard/westspace/westspace.schema.json
+    # yaml-language-server: $schema=https://github.com/evanstoddard/westspace/westspace.schema.json
     version: 1
 
     ncs:

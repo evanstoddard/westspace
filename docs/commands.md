@@ -19,7 +19,7 @@ Clones the template into `./NAME`, removes the cloned `.git`, and runs
 `git init`. It makes no commit and does not run west.
 
 - `--here`: scaffold into the current directory, which must be empty.
-- `--template-repo`: default `https://github.com/evanrstoddard/zephyr_template`.
+- `--template-repo`: default `https://github.com/evanstoddard/zephyr_template`.
 - `--template-ref`: tag or branch. Default: the latest GitHub release, or the
   default branch if there are no releases.
 

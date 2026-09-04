@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/evanrstoddard/westspace/westspace.schema.json",
+  "$id": "https://github.com/evanstoddard/westspace/westspace.schema.json",
   "title": "westspace configuration",
   "description": "Declarative description of a Zephyr west workspace: flavor (vanilla or NCS), build targets, and per-target configurations.",
   "type": "object",

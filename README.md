@@ -14,7 +14,7 @@ through `nrfutil toolchain-manager`.
 
 Requires Python 3.14+ and `git`.
 
-    uv tool install git+https://github.com/evanrstoddard/westspace
+    uv tool install git+https://github.com/evanstoddard/westspace
 
 From a local checkout:
 
