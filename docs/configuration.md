@@ -1,7 +1,7 @@
 # westspace.yml
 
 `westspace.yml` lives at the workspace root. It is validated against
-[`westspace.schema.json`](../westspace.schema.json); editors that understand the
+[`westspace.schema.json`](../src/westspace/westspace.schema.json); editors that understand the
 `yaml-language-server` schema directive will complete and check it.
 
 ## Top level
