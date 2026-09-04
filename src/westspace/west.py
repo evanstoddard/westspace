@@ -92,6 +92,9 @@ class WestRunner:
 
         self.run(*argv)
 
+    def flash(self, build_dir: str, *, args: Sequence[str] = ()) -> None:
+        self.run("flash", "-d", build_dir, *args)
+
 
 def runner_for(cfg: Config, ws: Workspace, *, nrfutil_path: str | None = None) -> WestRunner:
     if cfg.is_ncs:
