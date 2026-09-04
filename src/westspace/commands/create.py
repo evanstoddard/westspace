@@ -1,7 +1,8 @@
 """``westspace create`` - scaffold a new workspace from the Zephyr template.
 
-Pure scaffold: clone the template, drop its history, and start a fresh repo.
-It does not run ``west`` or build anything - follow with ``westspace init``.
+Pure scaffold: clone the template, drop its history, and start a fresh (empty)
+git repo. It makes no commit - the first commit is the user's to make - and it
+does not run ``west`` or build anything. Follow with ``westspace init``.
 """
 
 import argparse
@@ -55,7 +56,7 @@ def run(args: argparse.Namespace) -> int:
 
     _clone(args.template_repo, ref, dest)
     shutil.rmtree(dest / ".git", ignore_errors=True)
-    _fresh_repo(dest, args.template_repo, ref)
+    process.run(["git", "init", "-q", str(dest)])
 
     log.info("created workspace: %s", dest)
     hint = "westspace init" if args.here else f"cd {dest.name} && westspace init"
@@ -99,31 +100,3 @@ def _clone(repo_url: str, ref: str | None, dest: Path) -> None:
         argv += ["--branch", ref]
     argv += [repo_url, str(dest)]
     process.run(argv)
-
-
-def _fresh_repo(dest: Path, repo_url: str, ref: str | None) -> None:
-    process.run(["git", "init", "-q", str(dest)])
-    process.run(["git", "-C", str(dest), "add", "-A"])
-    if _has_git_identity(dest):
-        origin = f"{repo_url}@{ref}" if ref else repo_url
-        process.run(
-            ["git", "-C", str(dest), "commit", "-q", "-m", f"Initial commit from {origin}"]
-        )
-    else:
-        log.warning(
-            "git identity not configured; files are staged but not committed "
-            "(run 'git commit' in %s)",
-            dest,
-        )
-
-
-def _has_git_identity(dest: Path) -> bool:
-    for key in ("user.name", "user.email"):
-        result = process.run(
-            ["git", "-C", str(dest), "config", "--get", key],
-            check=False,
-            capture=True,
-        )
-        if result.returncode != 0 or not result.stdout.strip():
-            return False
-    return True
