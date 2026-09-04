@@ -48,6 +48,11 @@
       "default": "west.yml",
       "description": "West manifest inside manifest_dir used for `west init -l --mf`. Overridden by ncs.manifest_file when NCS is enabled."
     },
+    "toolchains": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Zephyr SDK GNU toolchains to install during `westspace init`, e.g. ['arm-zephyr-eabi']. Vanilla only (NCS uses the nrfutil toolchain bundle). Omit the key to install every toolchain; use an empty list to install none (SDK and host tools only)."
+    },
     "default_target": {
       "type": "string",
       "description": "Target used when `westspace build` is invoked with no target. If omitted and only one target exists, that target is used."

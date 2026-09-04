@@ -54,6 +54,14 @@ class Config:
             return self.ncs.get("manifest_file", DEFAULT_NCS_MANIFEST_FILE)
         return self.data.get("manifest_file", DEFAULT_MANIFEST_FILE)
 
+    @property
+    def toolchains(self) -> list[str] | None:
+        """Zephyr SDK GNU toolchains for ``west sdk install`` (vanilla only).
+
+        ``None`` (key absent) means install everything; ``[]`` means install none.
+        """
+        return self.data.get("toolchains")
+
     # -- targets ----------------------------------------------------------
     @property
     def targets(self) -> dict[str, Any]:
