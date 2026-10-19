@@ -55,6 +55,23 @@ Installs the NCS toolchain only: `nrfutil`, its plugins, and
 NCS only. Vanilla installs the Zephyr SDK with `west sdk install`, which needs
 a checked-out workspace, so it stays part of `init`.
 
+## seed
+
+    westspace seed DIR
+
+Populates `DIR` with every project in the manifest, for use as
+`west update --path-cache DIR`. Only `westspace.yml` and the manifest file are
+copied into `DIR`, then `west init` and `west update` run there. The source
+workspace needs nothing else, so in a Docker build it can be a directory holding
+just those two files.
+
+- `DIR` is created if missing. If it was seeded before, re-running refreshes it.
+  Any other non-empty directory is refused.
+- The toolchain must already be installed: `westspace toolchain` for NCS. Vanilla
+  creates a `.venv` with `west` inside `DIR`.
+- Manifests that import other files from their own repository are not
+  supported, since only the manifest file is copied.
+
 ## update
 
     westspace update
