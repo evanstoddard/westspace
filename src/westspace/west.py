@@ -36,8 +36,12 @@ class WestRunner:
     def init(self, manifest_dir: str, manifest_file: str) -> None:
         self.run("init", "-l", "--mf", manifest_file, manifest_dir)
 
-    def update(self, *extra: str) -> None:
-        self.run("update", *(extra or UPDATE_ARGS))
+    def update(self, *extra: str, cache: Path | None = None) -> None:
+        """Run ``west update``; *cache* is passed as ``--path-cache``."""
+        argv = ["update", *(extra or UPDATE_ARGS)]
+        if cache is not None:
+            argv += ["--path-cache", str(cache)]
+        self.run(*argv)
 
     def packages_pip_install(self) -> None:
         self.run("packages", "pip", "--install")

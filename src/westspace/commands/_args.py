@@ -1,6 +1,36 @@
 """Argument helpers shared between subcommands."""
 
 import argparse
+import os
+from pathlib import Path
+
+from ..errors import UsageError
+
+CACHE_ENV = "WESTSPACE_CACHE"
+
+
+def add_cache_argument(parser: argparse.ArgumentParser) -> None:
+    """Add ``--cache DIR`` (default ``$WESTSPACE_CACHE``) for ``west update``."""
+    parser.add_argument(
+        "--cache",
+        metavar="DIR",
+        type=Path,
+        default=os.environ.get(CACHE_ENV) or None,
+        help=(
+            "clone west projects from DIR (e.g. made by 'westspace seed') via "
+            f"'west update --path-cache'; default: ${CACHE_ENV}"
+        ),
+    )
+
+
+def cache_dir(args: argparse.Namespace) -> Path | None:
+    """The ``--cache`` directory, checked to exist; ``None`` when unset."""
+    if args.cache is None:
+        return None
+    cache = Path(args.cache).resolve()
+    if not cache.is_dir():
+        raise UsageError(f"cache directory not found: {cache}")
+    return cache
 
 
 def add_target_argument(parser: argparse.ArgumentParser, *, action: str) -> None:

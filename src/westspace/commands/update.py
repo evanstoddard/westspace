@@ -15,6 +15,7 @@ import logging
 
 from .. import config, nrfutil, west, workspace
 from ..errors import ToolNotFoundError, WestspaceError
+from ._args import add_cache_argument, cache_dir
 
 log = logging.getLogger("westspace")
 
@@ -23,12 +24,13 @@ HELP = "Re-run west update for the current workspace"
 
 
 def configure(parser: argparse.ArgumentParser) -> None:
-    del parser  # no options yet
+    add_cache_argument(parser)
 
 
 def run(args: argparse.Namespace) -> int:
     ws = workspace.from_args(args)
     cfg = config.load(ws.config_path)
+    cache = cache_dir(args)
 
     if not ws.is_initialized:
         raise WestspaceError("workspace not initialized; run 'westspace init' first")
@@ -48,6 +50,6 @@ def run(args: argparse.Namespace) -> int:
             raise ToolNotFoundError("nrfutil not found; run 'westspace init' first")
 
     runner = west.runner_for(cfg, ws, nrfutil_path=nrfutil_path)
-    runner.update()
+    runner.update(cache=cache)
     log.info("workspace updated: %s", ws.root)
     return 0

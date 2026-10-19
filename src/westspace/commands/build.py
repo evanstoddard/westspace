@@ -6,7 +6,12 @@ import logging
 from .. import config, nrfutil, west, workspace
 from ..errors import ToolNotFoundError, WestspaceError
 from . import init as init_cmd
-from ._args import add_passthrough_argument, add_target_argument
+from ._args import (
+    add_cache_argument,
+    add_passthrough_argument,
+    add_target_argument,
+    cache_dir,
+)
 
 log = logging.getLogger("westspace")
 
@@ -37,6 +42,7 @@ def configure(parser: argparse.ArgumentParser) -> None:
         action="store_false",
         help="do not run init automatically when the workspace is uninitialized",
     )
+    add_cache_argument(parser)
     add_passthrough_argument(
         parser,
         metavar="-- CMAKE_ARGS",
@@ -53,7 +59,7 @@ def run(args: argparse.Namespace) -> int:
         if not args.auto_init:
             raise WestspaceError("workspace not initialized; run 'westspace init'")
         log.info("workspace not initialized; running init first")
-        init_cmd.initialize(ws, cfg)
+        init_cmd.initialize(ws, cfg, cache=cache_dir(args))
 
     nrfutil_path = None
     if cfg.is_ncs:

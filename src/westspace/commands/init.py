@@ -17,10 +17,12 @@ safe to re-run.
 import argparse
 import logging
 import shutil
+from pathlib import Path
 
 from .. import config, hosttools, pyenv, west, workspace
 from ..errors import ConfigError
 from . import toolchain
+from ._args import add_cache_argument, cache_dir
 
 log = logging.getLogger("westspace")
 
@@ -34,19 +36,27 @@ def configure(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         help="remove any existing .west/ and re-run 'west init'",
     )
+    add_cache_argument(parser)
 
 
 def run(args: argparse.Namespace) -> int:
     ws = workspace.from_args(args)
     cfg = config.load(ws.config_path)
-    initialize(ws, cfg, force=args.force)
+    initialize(ws, cfg, force=args.force, cache=cache_dir(args))
     return 0
 
 
 def initialize(
-    ws: workspace.Workspace, cfg: config.Config, *, force: bool = False
+    ws: workspace.Workspace,
+    cfg: config.Config,
+    *,
+    force: bool = False,
+    cache: Path | None = None,
 ) -> None:
-    """Run the full init sequence for *ws*. Also used by ``build`` for auto-init."""
+    """Run the full init sequence for *ws*. Also used by ``build`` for auto-init.
+
+    *cache* is passed to ``west update`` as ``--path-cache``.
+    """
     _check_manifest(ws, cfg)
 
     if cfg.is_ncs:
@@ -55,7 +65,7 @@ def initialize(
         runner = _provision_vanilla(ws, cfg)
 
     _west_init(runner, ws, cfg, force=force)
-    runner.update()
+    runner.update(cache=cache)
     if not cfg.is_ncs:
         # NCS's toolchain bundle already ships every Zephyr/NCS Python
         # requirement, and its Python is not a venv, so `west packages pip

@@ -25,7 +25,7 @@ Clones the template into `./NAME`, removes the cloned `.git`, and runs
 
 ## init
 
-    westspace init [--force]
+    westspace init [--force] [--cache DIR]
 
 Brings an existing workspace to a buildable state.
 
@@ -38,6 +38,11 @@ plugins, run `nrfutil toolchain-manager install`, then `west init` and
 
 `west init` is skipped when `.west/` already exists. `--force` removes `.west/`
 first. The other steps always run, so `init` is safe to repeat.
+
+`--cache DIR` passes `--path-cache DIR` to `west update`, so projects are
+cloned from `DIR` (for example one made by `seed`) and only revisions missing
+from it are fetched. It defaults to `$WESTSPACE_CACHE`, and `update` and
+`build` accept it too.
 
 ## toolchain
 
@@ -74,16 +79,17 @@ just those two files.
 
 ## update
 
-    westspace update
+    westspace update [--cache DIR]
 
-Runs `west update` only. It refuses if `.west/config` records a different
+Runs `west update` only, with `--cache` as for `init`. It refuses if `.west/config` records a different
 manifest than `westspace.yml` now selects (for example after toggling `ncs`);
 run `westspace init --force` in that case.
 
 ## build
 
     westspace build [TARGET[:CONFIG]] [--pristine[={always,auto,never}]]
-                    [--board BOARD] [--no-auto-init] [-- CMAKE_ARGS]
+                    [--board BOARD] [--no-auto-init] [--cache DIR]
+                    [-- CMAKE_ARGS]
 
 Runs `west build` for the resolved target and config, assembling the board,
 `--sysbuild`, `-d <build_dir>`, `-S` snippets, `EXTRA_DTC_OVERLAY_FILE`,
@@ -93,6 +99,7 @@ Runs `west build` for the resolved target and config, assembling the board,
 - `--board` overrides the target's board.
 - Anything after `--` goes to CMake.
 - If `.west/` is missing, `init` runs first unless `--no-auto-init` is given.
+  `--cache` is used for that `init`.
 
 ## flash
 
