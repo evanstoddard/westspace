@@ -18,8 +18,9 @@ import argparse
 import logging
 import shutil
 
-from .. import config, hosttools, nrfutil, pyenv, west, workspace
+from .. import config, hosttools, pyenv, west, workspace
 from ..errors import ConfigError
+from . import toolchain
 
 log = logging.getLogger("westspace")
 
@@ -81,11 +82,7 @@ def _provision_vanilla(ws: workspace.Workspace, cfg: config.Config) -> west.West
 
 
 def _provision_ncs(ws: workspace.Workspace, cfg: config.Config) -> west.WestRunner:
-    if not cfg.ncs_version:
-        raise ConfigError(f"{cfg.path}: ncs.version is required for NCS workspaces")
-    nrf = nrfutil.ensure()
-    nrfutil.ensure_plugins(nrf)
-    nrfutil.toolchain_install(nrf, cfg.ncs_version)
+    nrf = toolchain.install(cfg)
     return west.runner_for(cfg, ws, nrfutil_path=nrf)
 
 

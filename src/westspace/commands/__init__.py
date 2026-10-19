@@ -10,8 +10,8 @@ Each module exposes a small, uniform interface consumed by :mod:`westspace.cli`:
 ``ALL`` is ordered for display in ``--help``.
 """
 
-from . import build, clean, create, flash, init, launch, list_, update
+from . import build, clean, create, flash, init, launch, list_, toolchain, update
 
-ALL = [create, init, update, build, flash, clean, launch, list_]
+ALL = [create, init, toolchain, update, build, flash, clean, launch, list_]
 
 __all__ = ["ALL"]

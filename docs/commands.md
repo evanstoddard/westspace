@@ -39,6 +39,22 @@ plugins, run `nrfutil toolchain-manager install`, then `west init` and
 `west init` is skipped when `.west/` already exists. `--force` removes `.west/`
 first. The other steps always run, so `init` is safe to repeat.
 
+## toolchain
+
+    westspace toolchain [CONFIG]
+
+Installs the NCS toolchain only: `nrfutil`, its plugins, and
+`nrfutil toolchain-manager install` for `ncs.version`. No `west init` or
+`west update`, and no manifest is needed.
+
+- `CONFIG`: a `westspace.yml` to read directly, with no workspace around it
+  (for example in a Docker build that copies or mounts only that file). It
+  cannot be combined with `-C`.
+- Without `CONFIG`: uses the workspace's `westspace.yml`.
+
+NCS only. Vanilla installs the Zephyr SDK with `west sdk install`, which needs
+a checked-out workspace, so it stays part of `init`.
+
 ## update
 
     westspace update
