@@ -11,7 +11,7 @@ import os
 import shutil
 import subprocess
 
-from .. import config, nrfutil, workspace
+from .. import config, nrfutil, toolsdir, workspace
 from ..errors import ToolNotFoundError, WestspaceError
 from ._args import add_passthrough_argument
 
@@ -56,7 +56,7 @@ def _require_venv(ws: workspace.Workspace) -> None:
 
 
 def _vanilla_env(ws: workspace.Workspace) -> dict:
-    env = dict(os.environ)
+    env = toolsdir.zephyr_sdk_env(ws) or dict(os.environ)
     env["PATH"] = f"{ws.venv_dir / 'bin'}{os.pathsep}{env.get('PATH', '')}"
     env["VIRTUAL_ENV"] = str(ws.venv_dir)
     env.pop("PYTHONHOME", None)

@@ -8,6 +8,13 @@ Global options, given before the command:
 | `-v, --verbose` | More output. Repeatable. |
 | `--version` | Print version and exit. |
 
+Environment variables:
+
+| Variable | Purpose |
+|----------|---------|
+| `WESTSPACE_CACHE` | Default for `--cache` (see `init`). |
+| `WESTSPACE_TOOLS_DIR` | Install every tool under this directory instead of `$HOME`: `bin/nrfutil`, `nrfutil/` (exported as `NRFUTIL_HOME`), `ncs/` (NCS toolchains), and `zephyr-sdk/` (Zephyr SDKs; the one matching `zephyr/SDK_VERSION` is exported as `ZEPHYR_SDK_INSTALL_DIR`). Use it for images run under a different `$HOME` or user, such as GitHub Actions container jobs. |
+
 For how `TARGET[:CONFIG]` resolves, see "Targets and configs" in
 [configuration.md](configuration.md).
 
@@ -48,17 +55,20 @@ from it are fetched. It defaults to `$WESTSPACE_CACHE`, and `update` and
 
     westspace toolchain [CONFIG]
 
-Installs the NCS toolchain only: `nrfutil`, its plugins, and
-`nrfutil toolchain-manager install` for `ncs.version`. No `west init` or
-`west update`, and no manifest is needed.
+Installs the toolchain only, with no `west init` or `west update`.
+
+NCS: `nrfutil`, its plugins, and `nrfutil toolchain-manager install` for
+`ncs.version`. No manifest is needed.
+
+Vanilla: `west packages pip --install` and `west sdk install` in an existing
+workspace, because the SDK version comes from the checked-out `zephyr/`. A
+directory made by `seed` qualifies, so an image can run
+`westspace seed DIR` and then `westspace -C DIR toolchain`.
 
 - `CONFIG`: a `westspace.yml` to read directly, with no workspace around it
-  (for example in a Docker build that copies or mounts only that file). It
-  cannot be combined with `-C`.
+  (for example in a Docker build that copies or mounts only that file). NCS
+  only. It cannot be combined with `-C`.
 - Without `CONFIG`: uses the workspace's `westspace.yml`.
-
-NCS only. Vanilla installs the Zephyr SDK with `west sdk install`, which needs
-a checked-out workspace, so it stays part of `init`.
 
 ## seed
 
@@ -72,8 +82,9 @@ just those two files.
 
 - `DIR` is created if missing. If it was seeded before, re-running refreshes it.
   Any other non-empty directory is refused.
-- The toolchain must already be installed: `westspace toolchain` for NCS. Vanilla
-  creates a `.venv` with `west` inside `DIR`.
+- NCS: the toolchain must already be installed (`westspace toolchain`).
+  Vanilla: creates a `.venv` with `west` inside `DIR`; install the SDK
+  afterwards with `westspace -C DIR toolchain`.
 - Manifests that import other files from their own repository are not
   supported, since only the manifest file is copied.
 

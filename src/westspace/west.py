@@ -14,7 +14,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import nrfutil, process, pyenv
+from . import nrfutil, process, pyenv, toolsdir
 from .config import Config
 from .errors import ConfigError
 from .workspace import Workspace
@@ -29,8 +29,10 @@ UPDATE_ARGS: tuple[str, ...] = ("-f", "smart", "-n", "-o=--depth=1")
 class WestRunner:
     root: Path
     argv_prefix: list[str] = field(default_factory=list)
+    env: dict[str, str] | None = None
 
     def run(self, *args, **kwargs) -> object:
+        kwargs.setdefault("env", self.env)
         return process.run([*self.argv_prefix, *args], cwd=self.root, **kwargs)
 
     def init(self, manifest_dir: str, manifest_file: str) -> None:
@@ -46,18 +48,23 @@ class WestRunner:
     def packages_pip_install(self) -> None:
         self.run("packages", "pip", "--install")
 
-    def sdk_install(self, toolchains: list[str] | None = None) -> None:
-        """Install the Zephyr SDK.
+    def sdk_install(
+        self, toolchains: list[str] | None = None, *, install_base: Path | None = None
+    ) -> None:
+        """Install the Zephyr SDK, under *install_base* (``-b``) if given.
 
         ``toolchains`` None -> all GNU toolchains; a non-empty list -> just those
         (``-t``); an empty list -> none (``-T``).
         """
+        argv = ["sdk", "install"]
+        if install_base is not None:
+            argv += ["-b", str(install_base)]
         if toolchains is None:
-            self.run("sdk", "install")
+            self.run(*argv)
         elif toolchains:
-            self.run("sdk", "install", "-t", *toolchains)
+            self.run(*argv, "-t", *toolchains)
         else:
-            self.run("sdk", "install", "-T")
+            self.run(*argv, "-T")
 
     def build(
         self,
@@ -113,4 +120,5 @@ def runner_for(cfg: Config, ws: Workspace, *, nrfutil_path: str | None = None) -
     return WestRunner(
         root=ws.root,
         argv_prefix=[str(pyenv.executable(ws.venv_dir, "west"))],
+        env=toolsdir.zephyr_sdk_env(ws),
     )

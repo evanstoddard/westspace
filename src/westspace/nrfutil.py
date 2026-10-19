@@ -2,8 +2,9 @@
 
 If ``nrfutil`` is already on PATH it is used as-is. Otherwise the latest binary
 for the host platform is downloaded once into a westspace-owned directory (via
-:mod:`platformdirs`) and reused from there. The toolchain *bundles* installed by
-``nrfutil toolchain-manager`` stay in nrfutil's own default location.
+:mod:`platformdirs`, or ``$WESTSPACE_TOOLS_DIR/bin``) and reused from there.
+The toolchain *bundles* installed by ``nrfutil toolchain-manager`` stay in
+nrfutil's own default location unless ``$WESTSPACE_TOOLS_DIR`` is set.
 """
 
 import logging
@@ -15,7 +16,7 @@ from pathlib import Path
 
 import platformdirs
 
-from . import process
+from . import process, toolsdir
 from .errors import ToolNotFoundError
 
 log = logging.getLogger("westspace")
@@ -41,6 +42,9 @@ def _binary_name() -> str:
 
 
 def _store_dir() -> Path:
+    base = toolsdir.root()
+    if base is not None:
+        return base / "bin"
     return Path(platformdirs.user_data_dir("westspace")) / "bin"
 
 
@@ -102,6 +106,11 @@ def ensure_plugins(nrfutil: str) -> None:
 
 
 def toolchain_install(nrfutil: str, ncs_version: str) -> None:
+    install_dir = toolsdir.ncs_install_dir()
+    if install_dir is not None:
+        process.run(
+            [nrfutil, "toolchain-manager", "config", "--set", f"install-dir={install_dir}"]
+        )
     process.run(
         [nrfutil, "toolchain-manager", "install", "--ncs-version", ncs_version]
     )

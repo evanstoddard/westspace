@@ -6,7 +6,7 @@ import sys
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
-from . import commands
+from . import commands, toolsdir
 from .errors import WestspaceError
 
 PROG = "westspace"
@@ -82,6 +82,7 @@ def run(argv: list[str] | None = None) -> int:
             parser.error(f"'{args.command}' does not take arguments after '--'")
         args.passthrough = passthrough
     _configure_logging(args.verbose)
+    toolsdir.apply_env()
 
     try:
         return args._run(args) or 0

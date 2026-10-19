@@ -71,8 +71,7 @@ def initialize(
         # requirement, and its Python is not a venv, so `west packages pip
         # --install` both is unnecessary and fails ("outside of a virtual
         # environment") under `toolchain-manager launch`.
-        runner.packages_pip_install()
-        runner.sdk_install(cfg.toolchains)
+        toolchain.install_zephyr_sdk(ws, cfg)
 
     hosttools.check()
     log.info("workspace ready: %s", ws.root)
