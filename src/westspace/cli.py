@@ -64,9 +64,23 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _split_passthrough(argv: list[str]) -> tuple[list[str], list[str] | None]:
+    """Split *argv* at the first ``--``; the tail is ``None`` when there is none."""
+    if "--" not in argv:
+        return argv, None
+    index = argv.index("--")
+    return argv[:index], argv[index + 1 :]
+
+
 def run(argv: list[str] | None = None) -> int:
     """Parse *argv* (default ``sys.argv``) and dispatch. Returns a process exit code."""
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    argv, passthrough = _split_passthrough(sys.argv[1:] if argv is None else list(argv))
+    args = parser.parse_args(argv)
+    if passthrough is not None:
+        if not hasattr(args, "passthrough"):
+            parser.error(f"'{args.command}' does not take arguments after '--'")
+        args.passthrough = passthrough
     _configure_logging(args.verbose)
 
     try:

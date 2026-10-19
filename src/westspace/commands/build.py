@@ -6,7 +6,7 @@ import logging
 from .. import config, nrfutil, west, workspace
 from ..errors import ToolNotFoundError, WestspaceError
 from . import init as init_cmd
-from ._args import add_passthrough_argument, add_target_argument, clean_passthrough
+from ._args import add_passthrough_argument, add_target_argument
 
 log = logging.getLogger("westspace")
 
@@ -79,6 +79,6 @@ def run(args: argparse.Namespace) -> int:
         conf=conf,
         cmake_args=resolved.cmake_args,
         west_args=resolved.west_args,
-        extra=clean_passthrough(args.passthrough),
+        extra=args.passthrough,
     )
     return 0

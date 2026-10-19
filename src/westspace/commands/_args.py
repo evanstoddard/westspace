@@ -19,18 +19,11 @@ def add_target_argument(parser: argparse.ArgumentParser, *, action: str) -> None
 def add_passthrough_argument(
     parser: argparse.ArgumentParser, *, metavar: str, help: str
 ) -> None:
-    """Add a trailing ``-- ...`` passthrough positional (everything after ``--``)."""
-    parser.add_argument(
-        "passthrough",
-        nargs=argparse.REMAINDER,
-        metavar=metavar,
-        help=help,
-    )
+    """Accept trailing ``-- ...`` arguments as ``args.passthrough``.
 
-
-def clean_passthrough(values: list[str] | None) -> list[str]:
-    """Drop a leading ``--`` left in place by ``argparse.REMAINDER``."""
-    values = list(values or [])
-    if values and values[0] == "--":
-        values = values[1:]
-    return values
+    The CLI splits argv at the first ``--`` before parsing (see
+    :func:`westspace.cli.run`), so options may appear anywhere before it. This
+    only sets the default and documents the arguments in ``--help``.
+    """
+    parser.set_defaults(passthrough=[])
+    parser.add_argument_group("passthrough", f"{metavar}: {help}")

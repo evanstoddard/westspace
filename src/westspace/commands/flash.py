@@ -5,7 +5,7 @@ import logging
 
 from .. import config, nrfutil, west, workspace
 from ..errors import ToolNotFoundError, WestspaceError
-from ._args import add_passthrough_argument, add_target_argument, clean_passthrough
+from ._args import add_passthrough_argument, add_target_argument
 
 log = logging.getLogger("westspace")
 
@@ -45,5 +45,5 @@ def run(args: argparse.Namespace) -> int:
 
     runner = west.runner_for(cfg, ws, nrfutil_path=nrfutil_path)
     log.info("flashing %s from %s", resolved.label, resolved.build_dir)
-    runner.flash(resolved.build_dir, args=clean_passthrough(args.passthrough))
+    runner.flash(resolved.build_dir, args=args.passthrough)
     return 0

@@ -13,7 +13,7 @@ import subprocess
 
 from .. import config, nrfutil, workspace
 from ..errors import ToolNotFoundError, WestspaceError
-from ._args import add_passthrough_argument, clean_passthrough
+from ._args import add_passthrough_argument
 
 log = logging.getLogger("westspace")
 
@@ -32,7 +32,7 @@ def configure(parser: argparse.ArgumentParser) -> None:
 def run(args: argparse.Namespace) -> int:
     ws = workspace.from_args(args)
     cfg = config.load(ws.config_path)
-    command = clean_passthrough(args.passthrough)
+    command = args.passthrough
 
     if cfg.is_ncs:
         argv = _ncs_argv(cfg, ws, command)
